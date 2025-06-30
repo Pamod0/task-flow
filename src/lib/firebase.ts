@@ -19,7 +19,10 @@ let db: Firestore | null = null;
 if (
   firebaseConfig.apiKey &&
   firebaseConfig.authDomain &&
-  firebaseConfig.projectId
+  firebaseConfig.projectId &&
+  firebaseConfig.storageBucket &&
+  firebaseConfig.messagingSenderId &&
+  firebaseConfig.appId
 ) {
   try {
     app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);

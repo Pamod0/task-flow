@@ -54,7 +54,7 @@ export function SignupForm() {
       toast({
         variant: "destructive",
         title: "Configuration Error",
-        description: "Firebase is not configured. Please add your credentials to a .env.local file.",
+        description: "Firebase is not configured. Please add credentials to .env.local and restart the server.",
       });
       return;
     }
@@ -84,7 +84,7 @@ export function SignupForm() {
             break;
           case 'auth/invalid-api-key':
           case 'auth/configuration-not-found':
-            description = "Firebase configuration is invalid. Please check your .env.local file.";
+            description = "Firebase configuration is invalid. Check your .env.local file and restart the server.";
             break;
           default:
             description = "An unexpected error occurred. Please try again.";
