@@ -11,7 +11,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -31,11 +30,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-import { PlusCircle } from "lucide-react";
 import React from "react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
+import type { Task } from "@/lib/types";
 
 const taskSchema = z.object({
   taskName: z.string().min(1, "Task name is required."),
@@ -45,81 +44,72 @@ const taskSchema = z.object({
   status: z.enum(["Pending", "In Progress", "Completed", "On Hold"]),
 });
 
-export function AddTaskDialog() {
-  const [open, setOpen] = React.useState(false);
+export function EditTaskDialog({ task, open, onOpenChange }: { task: Task, open: boolean, onOpenChange: (open: boolean) => void }) {
   const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
   
   const form = useForm<z.infer<typeof taskSchema>>({
     resolver: zodResolver(taskSchema),
-    defaultValues: {
-      taskName: "",
-      description: "",
-      hoursSpent: 1,
-      progressPercentage: 0,
-      status: "Pending",
-    },
   });
 
   const progress = form.watch("progressPercentage");
+  
+  React.useEffect(() => {
+    if (task && open) {
+      form.reset({
+        taskName: task.taskName,
+        description: task.description || "",
+        hoursSpent: task.hoursSpent,
+        progressPercentage: task.progressPercentage,
+        status: task.status,
+      });
+    }
+  }, [task, form, open]);
+
 
   async function onSubmit(values: z.infer<typeof taskSchema>) {
     setIsLoading(true);
-    const currentUser = auth?.currentUser;
 
-    if (!currentUser || !db) {
+    if (!db) {
       toast({
         variant: "destructive",
-        title: "Authentication Error",
-        description: "You must be logged in to add a task.",
+        title: "Database Error",
+        description: "Database connection not found.",
       });
       setIsLoading(false);
       return;
     }
 
     try {
-      await addDoc(collection(db, "tasks"), {
+      const taskRef = doc(db, "tasks", task.taskId);
+      await updateDoc(taskRef, {
         ...values,
-        employeeId: currentUser.uid,
-        taskDate: serverTimestamp(),
         lastUpdated: serverTimestamp(),
       });
       toast({
-        title: "Task Added",
-        description: "Your new task has been saved successfully.",
+        title: "Task Updated",
+        description: "Your task has been updated successfully.",
       });
-      setOpen(false);
+      onOpenChange(false);
     } catch (error) {
-      console.error("Error adding task:", error);
+      console.error("Error updating task:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "There was a problem saving your task. Please try again.",
+        description: "There was a problem updating your task. Please try again.",
       });
     } finally {
       setIsLoading(false);
     }
   }
-  
-  React.useEffect(() => {
-    if (open) {
-      form.reset();
-    }
-  }, [open, form]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" className="gap-1">
-          <PlusCircle className="h-3.5 w-3.5" />
-          Add Task
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add New Task</DialogTitle>
+          <DialogTitle>Edit Task</DialogTitle>
           <DialogDescription>
-            Fill in the details of the task you worked on.
+            Update the details of your task.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -168,10 +158,10 @@ export function AddTaskDialog() {
               name="progressPercentage"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Progress - {progress}%</FormLabel>
+                  <FormLabel>Progress - {progress || 0}%</FormLabel>
                   <FormControl>
                      <Slider
-                        value={[field.value]}
+                        value={[field.value || 0]}
                         onValueChange={(value) => field.onChange(value[0])}
                         max={100}
                         step={1}
@@ -205,8 +195,8 @@ export function AddTaskDialog() {
               )}
             />
             <DialogFooter className="pt-4">
-              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button type="submit" disabled={isLoading}>{isLoading ? 'Saving...' : 'Save Task'}</Button>
+              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+              <Button type="submit" disabled={isLoading}>{isLoading ? 'Saving...' : 'Save Changes'}</Button>
             </DialogFooter>
           </form>
         </Form>
