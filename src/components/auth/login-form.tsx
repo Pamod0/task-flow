@@ -65,6 +65,9 @@ export function LoginForm() {
           case 'auth/wrong-password':
             description = "Invalid email or password. Please try again.";
             break;
+          case 'auth/operation-not-allowed':
+            description = "Email/Password sign-in is not enabled. Please enable it in your Firebase console.";
+            break;
           case 'auth/invalid-api-key':
           case 'auth/configuration-not-found':
             description = "Firebase configuration is invalid. Check your .env.local file and restart the server.";

@@ -82,6 +82,9 @@ export function SignupForm() {
           case 'auth/weak-password':
             description = "The password is too weak. Please use at least 6 characters.";
             break;
+          case 'auth/operation-not-allowed':
+            description = "Email/Password sign-up is not enabled. Please enable it in your Firebase console.";
+            break;
           case 'auth/invalid-api-key':
           case 'auth/configuration-not-found':
             description = "Firebase configuration is invalid. Check your .env.local file and restart the server.";
