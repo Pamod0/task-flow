@@ -73,7 +73,7 @@ export function SignupForm() {
 
       router.push("/dashboard");
     } catch (error: any) {
-      let description = error.message;
+      let description = "An unknown error occurred. Please try again.";
       if (error.code) {
         switch (error.code) {
           case 'auth/email-already-in-use':
