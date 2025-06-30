@@ -3,9 +3,9 @@ export type UserProfile = {
   email: string;
   firstName: string;
   lastName: string;
-  employeeId: string;
-  designation: string;
-  department: string;
+  employeeId?: string;
+  designation?: string;
+  department?: string;
   role: 'Employee' | 'HOD' | 'Admin';
   phoneNumber?: string;
   dateOfJoining: number; // timestamp

@@ -57,10 +57,26 @@ export function LoginForm() {
       await signInWithEmailAndPassword(auth, values.email, values.password);
       router.push("/dashboard");
     } catch (error: any) {
+      let description = "An unknown error occurred. Please try again.";
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/invalid-credential':
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+            description = "Invalid email or password. Please try again.";
+            break;
+          case 'auth/invalid-api-key':
+          case 'auth/configuration-not-found':
+            description = "Firebase configuration is invalid. Please check your .env.local file.";
+            break;
+          default:
+            description = "An unexpected error occurred. Please try again.";
+        }
+      }
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: "Invalid email or password. Please try again.",
+        description,
       });
       console.error("Login error:", error);
     }

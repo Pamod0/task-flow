@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +26,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import Logo from "@/components/logo";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -49,7 +50,7 @@ export function SignupForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!auth) {
+    if (!auth || !db) {
       toast({
         variant: "destructive",
         title: "Configuration Error",
@@ -58,14 +59,41 @@ export function SignupForm() {
       return;
     }
     try {
-      await createUserWithEmailAndPassword(auth, values.email, values.password);
-      // TODO: Save firstName and lastName to user profile in Firestore
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+      
+      await setDoc(doc(db, "users", user.uid), {
+        userId: user.uid,
+        email: values.email,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        role: "Employee",
+        dateOfJoining: new Date().getTime(),
+      });
+
       router.push("/dashboard");
     } catch (error: any) {
+      let description = error.message;
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            description = "This email is already registered. Please try logging in.";
+            break;
+          case 'auth/weak-password':
+            description = "The password is too weak. Please use at least 6 characters.";
+            break;
+          case 'auth/invalid-api-key':
+          case 'auth/configuration-not-found':
+            description = "Firebase configuration is invalid. Please check your .env.local file.";
+            break;
+          default:
+            description = "An unexpected error occurred. Please try again.";
+        }
+      }
       toast({
         variant: "destructive",
         title: "Sign Up Failed",
-        description: error.message,
+        description,
       });
       console.error("Signup error:", error);
     }
