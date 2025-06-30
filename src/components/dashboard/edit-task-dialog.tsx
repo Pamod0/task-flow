@@ -90,7 +90,6 @@ export function EditTaskDialog({ task, open, onOpenChange }: { task: Task, open:
         title: "Task Updated",
         description: "Your task has been updated successfully.",
       });
-      setIsLoading(false);
       onOpenChange(false);
     } catch (error) {
       console.error("Error updating task:", error);
@@ -99,6 +98,7 @@ export function EditTaskDialog({ task, open, onOpenChange }: { task: Task, open:
         title: "Error",
         description: "There was a problem updating your task. Please try again.",
       });
+    } finally {
       setIsLoading(false);
     }
   }

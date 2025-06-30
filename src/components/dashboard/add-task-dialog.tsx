@@ -88,7 +88,7 @@ export function AddTaskDialog() {
         title: "Task Added",
         description: "Your new task has been saved successfully.",
       });
-      setIsLoading(false);
+      form.reset();
       setOpen(false);
     } catch (error) {
       console.error("Error adding task:", error);
@@ -97,7 +97,8 @@ export function AddTaskDialog() {
         title: "Error",
         description: "There was a problem saving your task. Please try again.",
       });
-      setIsLoading(false);
+    } finally {
+        setIsLoading(false);
     }
   }
   
