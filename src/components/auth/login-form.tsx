@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import React from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +37,7 @@ const formSchema = z.object({
 export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = React.useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,15 +47,16 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!auth) {
-      toast({
-        variant: "destructive",
-        title: "Configuration Error",
-        description: "Firebase is not configured. Please add credentials to .env.local and restart the server.",
-      });
-      return;
-    }
+    setIsLoading(true);
     try {
+      if (!auth) {
+        toast({
+          variant: "destructive",
+          title: "Configuration Error",
+          description: "Firebase is not configured. Please add credentials to .env.local and restart the server.",
+        });
+        return;
+      }
       await signInWithEmailAndPassword(auth, values.email, values.password);
       router.push("/dashboard");
     } catch (error: any) {
@@ -82,6 +85,8 @@ export function LoginForm() {
         description,
       });
       console.error("Login error:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -131,8 +136,8 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Logging in..." : "Login"}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Logging in..." : "Login"}
             </Button>
           </form>
         </Form>

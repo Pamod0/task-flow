@@ -7,6 +7,7 @@ import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
+import React from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +40,7 @@ const formSchema = z.object({
 export function SignupForm() {
     const router = useRouter();
     const { toast } = useToast();
+    const [isLoading, setIsLoading] = React.useState(false);
     const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,15 +52,16 @@ export function SignupForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!auth || !db) {
-      toast({
-        variant: "destructive",
-        title: "Configuration Error",
-        description: "Firebase is not configured. Please add credentials to .env.local and restart the server.",
-      });
-      return;
-    }
+    setIsLoading(true);
     try {
+      if (!auth || !db) {
+        toast({
+          variant: "destructive",
+          title: "Configuration Error",
+          description: "Firebase is not configured. Please add credentials to .env.local and restart the server.",
+        });
+        return;
+      }
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
       
@@ -99,6 +102,8 @@ export function SignupForm() {
         description,
       });
       console.error("Signup error:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -168,8 +173,8 @@ export function SignupForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Creating account..." : "Create an account"}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Creating account..." : "Create an account"}
             </Button>
           </form>
         </Form>
