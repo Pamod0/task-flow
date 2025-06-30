@@ -49,6 +49,14 @@ export function SignupForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!auth) {
+      toast({
+        variant: "destructive",
+        title: "Configuration Error",
+        description: "Firebase is not configured. Please add your credentials to a .env.local file.",
+      });
+      return;
+    }
     try {
       await createUserWithEmailAndPassword(auth, values.email, values.password);
       // TODO: Save firstName and lastName to user profile in Firestore

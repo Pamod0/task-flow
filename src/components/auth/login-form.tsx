@@ -45,6 +45,14 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!auth) {
+      toast({
+        variant: "destructive",
+        title: "Configuration Error",
+        description: "Firebase is not configured. Please add your credentials to a .env.local file.",
+      });
+      return;
+    }
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
       router.push("/dashboard");
