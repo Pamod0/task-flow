@@ -2,12 +2,9 @@ import React from 'react';
 import {
   SidebarProvider,
   Sidebar,
-  SidebarHeader,
   SidebarContent,
   SidebarInset,
-  SidebarTrigger,
 } from '@/components/ui/sidebar';
-import Logo from '@/components/logo';
 import { SidebarNav } from '@/components/dashboard/sidebar-nav';
 import { DashboardHeader } from '@/components/dashboard/header';
 
@@ -19,11 +16,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <Sidebar>
-        <SidebarHeader className="flex-row items-center justify-between">
-          <Logo />
-          <SidebarTrigger />
-        </SidebarHeader>
-        <SidebarContent>
+        <SidebarContent className="pt-16">
           <SidebarNav />
         </SidebarContent>
       </Sidebar>
