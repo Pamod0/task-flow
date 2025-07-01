@@ -4,9 +4,11 @@ import {
   Sidebar,
   SidebarContent,
   SidebarInset,
+  SidebarHeader,
 } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/dashboard/sidebar-nav';
 import { DashboardHeader } from '@/components/dashboard/header';
+import Logo from '@/components/logo';
 
 export default function DashboardLayout({
   children,
@@ -16,7 +18,10 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <Sidebar>
-        <SidebarContent className="pt-16">
+        <SidebarHeader>
+          <Logo textClassName="group-data-[collapsible=icon]:hidden" />
+        </SidebarHeader>
+        <SidebarContent>
           <SidebarNav />
         </SidebarContent>
       </Sidebar>
