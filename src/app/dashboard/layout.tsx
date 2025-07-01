@@ -5,6 +5,7 @@ import {
   SidebarHeader,
   SidebarContent,
   SidebarInset,
+  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import Logo from '@/components/logo';
 import { SidebarNav } from '@/components/dashboard/sidebar-nav';
@@ -18,8 +19,9 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <Sidebar>
-        <SidebarHeader>
+        <SidebarHeader className="flex-row items-center justify-between">
           <Logo />
+          <SidebarTrigger />
         </SidebarHeader>
         <SidebarContent>
           <SidebarNav />
